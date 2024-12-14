@@ -16,6 +16,7 @@ let package = Package(
         .iOSApplication(
             name: "Recyclon",
             targets: ["AppModule"],
+            teamIdentifier: "75AGNZS6G2",
             displayVersion: "1.0",
             bundleVersion: "1",
             appIcon: .placeholder(icon: .leaf),
