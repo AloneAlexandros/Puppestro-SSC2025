@@ -26,8 +26,7 @@ struct DragNDrop: View {
                 .draggable(String("📄"))
                 .font(font)
                 .offset(CGSize(width: CGFloat.random(in: -200...200), height: CGFloat.random(in: -200...200)))
-        }
-    }
+        }    }
 }
 
 #Preview {
