@@ -1,61 +1,87 @@
-//
-//  SoundPlayground.swift
-//  Puppestro
-//
-//  Created by Αλέξανδρος Σαμωνάκης on 16/1/25.
-//
-
 import SwiftUI
 import AVFoundation
 
-struct SoundPlayground: View {
-    @State var audioPlayer: AVAudioPlayer?
-    let engine = AVAudioEngine()
-    let speedControl = AVAudioUnitVarispeed()
-    @State var pitchControl = AVAudioUnitTimePitch()
-    var body: some View {
-        Text("Shimmy shimmy yawn")
-            .task {
-              while true { // replace true with variable if you want to stop it
-                  let sound = Bundle.main.path(forResource: "aaaa", ofType: "m4a")
-                  try! play(URL(fileURLWithPath: sound!))
-                  try? await Task.sleep(for: .seconds(4))
-              }
-            }
-            .onAppear {
-                let sound = Bundle.main.path(forResource: "aaaa", ofType: "m4a")
-                try! play(URL(fileURLWithPath: sound!))
-            }
-        Slider(value: $pitchControl.pitch, in: -1200...1200)
+class AudioManager: ObservableObject {
+    private let engine = AVAudioEngine()
+    private let playerNode = AVAudioPlayerNode()
+    private let pitchControl = AVAudioUnitTimePitch()
+    private var audioBuffer: AVAudioPCMBuffer?
+
+    @Published var pitch: Float = 0.0 // Pitch in cents (-2400 to +2400)
+
+    init() {
+        setupAudio()
     }
 
-    func play(_ url: URL) throws {
-        // 1: load the file
-        let file = try AVAudioFile(forReading: url)
+    private func setupAudio() {
+        guard let fileURL = Bundle.main.url(forResource: "aaaa", withExtension: "m4a") else {
+            print("Audio file not found.")
+            return
+        }
 
-        // 2: create the audio player
-        let audioPlayer = AVAudioPlayerNode()
+        do {
+            let file = try AVAudioFile(forReading: fileURL)
+            let format = file.processingFormat
+            let frameCount = AVAudioFrameCount(file.length)
 
-        // 3: connect the components to our playback engine
-        engine.attach(audioPlayer)
-        engine.attach(pitchControl)
-        engine.attach(speedControl)
+            audioBuffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: frameCount)
+            try file.read(into: audioBuffer!)
 
-        // 4: arrange the parts so that output from one is input to another
-        engine.connect(audioPlayer, to: speedControl, format: nil)
-        engine.connect(speedControl, to: pitchControl, format: nil)
-        engine.connect(pitchControl, to: engine.mainMixerNode, format: nil)
+            engine.attach(playerNode)
+            engine.attach(pitchControl)
 
-        // 5: prepare the player to play its file from the beginning
-        audioPlayer.scheduleFile(file, at: nil)
+            engine.connect(playerNode, to: pitchControl, format: format)
+            engine.connect(pitchControl, to: engine.mainMixerNode, format: format)
 
-        // 6: start the engine and player
-        try engine.start()
-        audioPlayer.play()
+            try engine.start()
+        } catch {
+            print("Error setting up audio: \(error)")
+        }
+    }
+
+    func startPlayback() {
+        guard let buffer = audioBuffer else { return }
+        playerNode.scheduleBuffer(buffer, at: nil, options: .loops, completionHandler: nil)
+        playerNode.play()
+    }
+
+    func stopPlayback() {
+        playerNode.stop()
+        engine.stop()
+    }
+
+    func setPitch(_ value: Float) {
+        pitchControl.pitch = value
     }
 }
 
+struct SoundPlayerView: View {
+    @StateObject private var audioManager = AudioManager()
+
+    var body: some View {
+        VStack {
+            Text("Real-Time Pitch Control")
+                .font(.headline)
+                .padding()
+
+            Slider(value: $audioManager.pitch, in: -2400...2400, step: 1)
+                .padding()
+                .onChange(of: audioManager.pitch) { newPitch in
+                    audioManager.setPitch(newPitch)
+                }
+
+            Text("Pitch: \(Int(audioManager.pitch)) cents")
+                .font(.subheadline)
+        }
+        .onAppear {
+            audioManager.startPlayback()
+        }
+        .onDisappear {
+            audioManager.stopPlayback()
+        }
+    }
+}
 
 #Preview {
-    SoundPlayground()
+    SoundPlayerView()
 }
