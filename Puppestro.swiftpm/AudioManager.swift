@@ -4,21 +4,19 @@ import AVFoundation
 class AudioManager: ObservableObject {
     private let engine = AVAudioEngine()
     private let playerNode = AVAudioPlayerNode()
-    private let pitchControl = AVAudioUnitTimePitch()
+    @Published var pitchControl = AVAudioUnitTimePitch()
     private var audioBuffer: AVAudioPCMBuffer?
 
-    @Published var pitch: Float = 0.0 // Pitch in cents (-2400 to +2400)
-
-    init() {
-        setupAudio()
-    }
-
-    private func setupAudio() {
-        guard let fileURL = Bundle.main.url(forResource: "aaaa", withExtension: "m4a") else {
+    init(fileName: String, fileExtension: String) {
+        guard let url = Bundle.main.url(forResource: fileName, withExtension: fileExtension) else {
             print("Audio file not found.")
             return
         }
+        pitchControl.pitch = -94
+        setupAudio(url)
+    }
 
+    private func setupAudio(_ fileURL: URL) {
         do {
             let file = try AVAudioFile(forReading: fileURL)
             let format = file.processingFormat
@@ -47,16 +45,12 @@ class AudioManager: ObservableObject {
 
     func stopPlayback() {
         playerNode.stop()
-        engine.stop()
-    }
-
-    func setPitch(_ value: Float) {
-        pitchControl.pitch = value
     }
 }
 
-struct SoundPlayerView: View {
-    @StateObject private var audioManager = AudioManager()
+struct AudioManagerPlayground: View {
+    @StateObject private var audioManager = AudioManager(fileName: "aaaa", fileExtension: ".m4a")
+    @State var isPlaying = false
 
     var body: some View {
         VStack {
@@ -64,24 +58,35 @@ struct SoundPlayerView: View {
                 .font(.headline)
                 .padding()
 
-            Slider(value: $audioManager.pitch, in: -2400...2400, step: 1)
+            Slider(value: $audioManager.pitchControl.pitch, in: -2400...2400, step: 1)
                 .padding()
-                .onChange(of: audioManager.pitch) { newPitch in
-                    audioManager.setPitch(newPitch)
-                }
+            Stepper(value: $audioManager.pitchControl.pitch, in: -2400...2400, step: 100) {
+                Text("Step a semitone")
+            }
+            Stepper(value: $audioManager.pitchControl.pitch, step: 1200)
+            {
+                Text("Step an octave")
+            }
 
-            Text("Pitch: \(Int(audioManager.pitch)) cents")
+            Text("Pitch: \(Int(audioManager.pitchControl.pitch)) cents")
                 .font(.subheadline)
         }
-        .onAppear {
-            audioManager.startPlayback()
+        Button {
+            isPlaying.toggle()
+            if isPlaying {
+                audioManager.startPlayback()
+            }
+            else {
+                audioManager.stopPlayback()
+            }
+        } label: {
+            Text("Toggle playback")
+                .font(.headline)
         }
-        .onDisappear {
-            audioManager.stopPlayback()
-        }
+
     }
 }
 
 #Preview {
-    SoundPlayerView()
+    AudioManagerPlayground()
 }
