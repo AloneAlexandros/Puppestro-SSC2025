@@ -19,7 +19,7 @@ class AudioManager: ObservableObject {
     private func setupAudio(_ fileURL: URL) {
         do {
             let file = try AVAudioFile(forReading: fileURL)
-            let format = file.processingFormat
+            let format = file.processingFormat  
             let frameCount = AVAudioFrameCount(file.length)
 
             audioBuffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: frameCount)
@@ -49,7 +49,7 @@ class AudioManager: ObservableObject {
 }
 
 struct AudioManagerPlayground: View {
-    @StateObject private var audioManager = AudioManager(fileName: "aaaa", fileExtension: ".m4a")
+    @StateObject private var audioManager = AudioManager(fileName: "default", fileExtension: ".m4a")
     @State var isPlaying = false
 
     var body: some View {

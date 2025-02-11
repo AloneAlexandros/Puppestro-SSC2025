@@ -34,7 +34,8 @@ let package = Package(
             ],
             capabilities: [
                 .camera(purposeString: "This playground needs camera access for hand recognition")
-            ]
+            ],
+            appCategory: .musicGames
         )
     ],
     targets: [
