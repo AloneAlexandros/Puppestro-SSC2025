@@ -11,7 +11,6 @@ struct ContentView: View {
     var body: some View {
         ZStack(alignment: .bottom) {
             ScannerView(handPoseInfo: $handPoseInfo, handPoints: $handPoints)
-            
             // Draw lines between finger joints and the wrist
             Path { path in
                 let fingerJoints = [
@@ -77,7 +76,7 @@ struct ScannerView: UIViewControllerRepresentable {
     func makeUIViewController(context: Context) -> UIViewController {
         let viewController = UIViewController()
         
-        guard let videoCaptureDevice = AVCaptureDevice.default(for: .video),
+        guard let videoCaptureDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .front),
               let videoInput = try? AVCaptureDeviceInput(device: videoCaptureDevice),
               captureSession.canAddInput(videoInput) else {
             return viewController
@@ -162,7 +161,7 @@ struct ScannerView: UIViewControllerRepresentable {
 
                 request.maximumHandCount = 1
 
-                let handler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, orientation: .up, options: [:])
+                let handler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, orientation: .leftMirrored, options: [:])
                 do {
                     try handler.perform([request])
                 } catch {
@@ -179,6 +178,5 @@ struct ScannerView: UIViewControllerRepresentable {
             }
         }
     
+
 }
-
-
