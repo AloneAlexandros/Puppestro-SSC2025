@@ -6,14 +6,16 @@ class AudioManager: ObservableObject {
     private let playerNode = AVAudioPlayerNode()
     @Published var pitchControl = AVAudioUnitTimePitch()
     private var audioBuffer: AVAudioPCMBuffer?
+    @Published var pitchOffset: Float = 0
 
-    init(fileName: String, fileExtension: String) {
+    init(fileName: String, fileExtension: String, offset: Float) {
         guard let url = Bundle.main.url(forResource: fileName, withExtension: fileExtension) else {
             print("Audio file not found.")
             return
         }
         pitchControl.pitch = -94
         setupAudio(url)
+        pitchOffset = offset
     }
 
     private func setupAudio(_ fileURL: URL) {
@@ -46,10 +48,14 @@ class AudioManager: ObservableObject {
     func stopPlayback() {
         playerNode.stop()
     }
+    
+    func setPitch(_ pitch: Float){
+        pitchControl.pitch = pitch + pitchOffset
+    }
 }
 
 struct AudioManagerPlayground: View {
-    @StateObject private var audioManager = AudioManager(fileName: "default", fileExtension: ".m4a")
+    @StateObject private var audioManager = AudioManager(fileName: "default", fileExtension: ".m4a", offset: -94)
     @State var isPlaying = false
 
     var body: some View {
