@@ -6,14 +6,14 @@ class AudioManager: ObservableObject {
     private let playerNode = AVAudioPlayerNode()
     @Published var pitchControl = AVAudioUnitTimePitch()
     private var audioBuffer: AVAudioPCMBuffer?
-    @Published var pitchOffset: Float = 0
+    @Published var pitchOffset: Float = -94
+    var isPlaying = false
 
     init(fileName: String, fileExtension: String, offset: Float) {
         guard let url = Bundle.main.url(forResource: fileName, withExtension: fileExtension) else {
             print("Audio file not found.")
             return
         }
-        pitchControl.pitch = -94
         setupAudio(url)
         pitchOffset = offset
     }
@@ -43,6 +43,7 @@ class AudioManager: ObservableObject {
         guard let buffer = audioBuffer else { return }
         playerNode.scheduleBuffer(buffer, at: nil, options: .loops, completionHandler: nil)
         playerNode.play()
+        isPlaying = true
     }
 
     func stopPlayback() {
@@ -51,6 +52,12 @@ class AudioManager: ObservableObject {
     
     func setPitch(_ pitch: Float){
         pitchControl.pitch = pitch + pitchOffset
+        if (pitch == 0){
+            stopPlayback()
+        }
+        else if (!isPlaying){
+            startPlayback()
+        }
     }
 }
 
