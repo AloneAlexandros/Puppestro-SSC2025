@@ -16,6 +16,7 @@ class AudioManager: ObservableObject {
         }
         setupAudio(url)
         pitchOffset = offset
+        startPlayback()
     }
 
     private func setupAudio(_ fileURL: URL) {
@@ -48,6 +49,7 @@ class AudioManager: ObservableObject {
 
     func stopPlayback() {
         playerNode.stop()
+        isPlaying = false
     }
     
     func setPitch(_ pitch: Float){

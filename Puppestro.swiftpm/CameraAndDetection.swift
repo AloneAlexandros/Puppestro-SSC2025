@@ -2,39 +2,14 @@ import SwiftUI
 import AVFoundation
 import Vision
 
-// 1. Application main interface
-struct ContentView: View {
-    
-    @State private var thumbPoint: CGPoint = .zero
-    @State private var fingerAvaragePoint: CGPoint = .zero
-    @State private var wristPoint: CGPoint = .zero
-    
-    var body: some View {
-        ZStack(alignment: .bottom) {
-            ScannerView(fingerAvaragePoint: $fingerAvaragePoint, wristPoint: $wristPoint, thumbPoint: $thumbPoint)
-            // Draw circles for the hand points, including the wrist
-            Circle()
-                .fill(.green)
-                .frame(width: 20)
-                .position(x: thumbPoint.x, y: thumbPoint.y)
-            Circle()
-                .fill(.green)
-                .frame(width: 20)
-                .position(x: fingerAvaragePoint.x, y: fingerAvaragePoint.y)
-            Circle()
-                .fill(.red)
-                .frame(width: 15)
-                .position(x: wristPoint.x, y: wristPoint.y)
-        }
-    }
-}
 
-// 2. Implementing the view responsible for detecting the hand pose
+//Implementing the view responsible for detecting the hand pose
 struct ScannerView: UIViewControllerRepresentable {
     
     @Binding var fingerAvaragePoint: CGPoint
     @Binding var wristPoint: CGPoint
     @Binding var thumbPoint: CGPoint
+    @Binding var calibrationPoint: CGPoint
     
     let captureSession = AVCaptureSession()
     
@@ -110,10 +85,11 @@ struct ScannerView: UIViewControllerRepresentable {
                         ]
                         let thumbJoint: [VNHumanHandPoseObservation.JointName] = [.thumbTip]
                         let wristJoint: [VNHumanHandPoseObservation.JointName] = [.wrist]
+                        let calibrationJoint: [VNHumanHandPoseObservation.JointName] = [.thumbMP]
                         var avaragePoint: CGPoint = CGPoint(x: 0,y: 0)
                         var jointsChecked = 0
                         for joint in fingerJoints {
-                            if let recognizedPoint = try? observation.recognizedPoint(joint), recognizedPoint.confidence > 0.5 {
+                            if let recognizedPoint = try? observation.recognizedPoint(joint), recognizedPoint.confidence > 0.8 {
                                 avaragePoint = CGPoint(x: recognizedPoint.location.x + avaragePoint.x, y: recognizedPoint.location.y + avaragePoint.y)
                                 jointsChecked += 1
                             }
@@ -123,13 +99,18 @@ struct ScannerView: UIViewControllerRepresentable {
                             avaragePoint = CGPoint(x: avaragePoint.x/CGFloat(jointsChecked), y: avaragePoint.y/CGFloat(jointsChecked))
                         }
                         for joint in thumbJoint {
-                            if let recognizedPoint = try? observation.recognizedPoint(joint), recognizedPoint.confidence > 0.5 {
+                            if let recognizedPoint = try? observation.recognizedPoint(joint), recognizedPoint.confidence > 0.8 {
                                 self.parent.thumbPoint = self.convertVisionPoint(recognizedPoint.location)
                             }
                         }
                         for joint in wristJoint {
-                            if let recognizedPoint = try? observation.recognizedPoint(joint), recognizedPoint.confidence > 0.5 {
+                            if let recognizedPoint = try? observation.recognizedPoint(joint), recognizedPoint.confidence > 0.8 {
                                 self.parent.wristPoint = self.convertVisionPoint(recognizedPoint.location)
+                            }
+                        }
+                        for joint in calibrationJoint {
+                            if let recognizedPoint = try? observation.recognizedPoint(joint), recognizedPoint.confidence > 0.8 {
+                                self.parent.calibrationPoint = self.convertVisionPoint(recognizedPoint.location)
                             }
                         }
                         // Convert normalized Vision points to screen coordinates and update coordinates
@@ -157,4 +138,61 @@ struct ScannerView: UIViewControllerRepresentable {
         }
     
 
+}
+
+struct HandRecognitionTest: View {
+    
+    @State private var thumbPoint: CGPoint = .zero
+    @State private var fingerAvaragePoint: CGPoint = .zero
+    @State private var wristPoint: CGPoint = .zero
+    @State private var calibrationPoint: CGPoint = .zero
+    
+    var body: some View {
+        ZStack(alignment: .bottom) {
+            ScannerView(fingerAvaragePoint: $fingerAvaragePoint, wristPoint: $wristPoint, thumbPoint: $thumbPoint, calibrationPoint: $calibrationPoint)
+            // Draw circles for the hand points, including the wrist
+            Circle()
+                .fill(.green)
+                .frame(width: 20)
+                .position(x: thumbPoint.x, y: thumbPoint.y)
+            Circle()
+                .fill(.green)
+                .frame(width: 20)
+                .position(x: fingerAvaragePoint.x, y: fingerAvaragePoint.y)
+            Circle()
+                .fill(.red)
+                .frame(width: 15)
+                .position(x: wristPoint.x, y: wristPoint.y)
+            Circle()
+                .fill(.red)
+                .frame(width: 15)
+                .position(x: calibrationPoint.x, y: calibrationPoint.y)
+        }
+    }
+}
+
+struct HandRecognitionSimpleOverlay: View {
+    
+    @Binding var thumbPoint: CGPoint
+    @Binding var fingerAvaragePoint: CGPoint
+    @Binding var wristPoint: CGPoint
+    @Binding var calibrationPoint: CGPoint
+    
+    var body: some View {
+        ZStack(alignment: .bottom) {
+            ScannerView(fingerAvaragePoint: $fingerAvaragePoint, wristPoint: $wristPoint, thumbPoint: $thumbPoint, calibrationPoint: $calibrationPoint)
+            // Draw circles for the hand points, including the wrist
+            Circle()
+                .fill(.green)
+                .frame(width: 20)
+                .position(x: thumbPoint.x, y: thumbPoint.y)
+            Circle()
+                .fill(.green)
+                .frame(width: 20)
+                .position(x: fingerAvaragePoint.x, y: fingerAvaragePoint.y)
+        }
+    }
+}
+#Preview {
+    HandRecognitionTest()
 }
