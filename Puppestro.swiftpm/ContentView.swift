@@ -2,14 +2,14 @@ import SwiftUI
 import Foundation
 
 struct ContentView: View {
-    @StateObject private var audioManager = AudioManager(fileName: "default", fileExtension: ".m4a", offset: -534)
+    @StateObject private var audioManager = AudioManager(fileName: "clarinet", fileExtension: ".m4a", offset: 0)
     @State var thumbPoint: CGPoint = .zero
     @State var fingerAvaragePoint: CGPoint = .zero
     @State var wristPoint: CGPoint = .zero
     @State var calibrationPoint: CGPoint = .zero
     var minimumDistance: Float = 0
-    var maximumDisrance: Float = 6.0
-    @State var noteName: String = ""
+    var maximumDisrance: Float = 3.0
+    @State var noteName: String = "none"
     var body: some View {
         let distance = CGTools.distanceSquared(from: thumbPoint, to: fingerAvaragePoint)
         let calibrationDistance = CGTools.distanceSquared(from: wristPoint, to: calibrationPoint)
@@ -17,8 +17,14 @@ struct ContentView: View {
         HandRecognitionSimpleOverlay(thumbPoint: $thumbPoint, fingerAvaragePoint: $fingerAvaragePoint, wristPoint: $wristPoint, calibrationPoint: $calibrationPoint)
             .onChange(of: thumbPoint) {
                 var pitch: Float
-                (noteName, pitch) = RangeToMusic.returnCorrectNote(allNotes: false, minimumValue: minimumDistance, maximumValue: maximumDisrance, currentValue: Float(calibratedDistance), pitchOffset: 0, octaves: 1, startingOctave: 1)
+                (noteName, pitch) = RangeToMusic.returnCorrectNote(allNotes: false, minimumValue: minimumDistance, maximumValue: maximumDisrance, currentValue: Float(calibratedDistance), pitchOffset: 0, octaves: 1, startingOctave: 0)
                 audioManager.setPitch(pitch)
+                if noteName == "none"{
+                    audioManager.stopPlayback()
+                }
+                else{
+                    audioManager.startPlayback()
+                }
             }
         Text("\(calibratedDistance)")
         Text(noteName)
