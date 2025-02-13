@@ -10,7 +10,7 @@ import AppleProductTypes
 let package = Package(
     name: "Puppestro",
     platforms: [
-        .iOS("17.5")
+        .iOS("18.0")
     ],
     products: [
         .iOSApplication(
