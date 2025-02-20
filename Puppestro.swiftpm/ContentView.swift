@@ -10,25 +10,36 @@ struct ContentView: View {
     var minimumDistance: Float = 0
     var maximumDisrance: Float = 3.0
     @State var noteName: String = "none"
+    @State var notePoint: CGPoint = .zero
     var body: some View {
         let distance = CGTools.distanceSquared(from: thumbPoint, to: fingerAvaragePoint)
         let calibrationDistance = CGTools.distanceSquared(from: wristPoint, to: calibrationPoint)
         let calibratedDistance = distance/calibrationDistance
-        HandRecognitionSimpleOverlay(thumbPoint: $thumbPoint, fingerAvaragePoint: $fingerAvaragePoint, wristPoint: $wristPoint, calibrationPoint: $calibrationPoint)
-            .onChange(of: thumbPoint) {
-                var pitch: Float
-                (noteName, pitch) = RangeToMusic.returnCorrectNote(allNotes: false, minimumValue: minimumDistance, maximumValue: maximumDisrance, currentValue: Float(calibratedDistance), pitchOffset: 0, octaves: 1, startingOctave: 0)
-                audioManager.setPitch(pitch)
-                if noteName == "none"{
-                    audioManager.stopPlayback()
+        ZStack{
+            HandRecognitionSimpleOverlay(thumbPoint: $thumbPoint, fingerAvaragePoint: $fingerAvaragePoint, wristPoint: $wristPoint, calibrationPoint: $calibrationPoint)
+                .onChange(of: thumbPoint) {
+                    var pitch: Float
+                    (noteName, pitch) = RangeToMusic.returnCorrectNote(allNotes: false, minimumValue: minimumDistance, maximumValue: maximumDisrance, currentValue: Float(calibratedDistance), pitchOffset: 0, octaves: 1, startingOctave: 0)
+                    audioManager.setPitch(pitch)
+                    if noteName == "none"{
+                        audioManager.stopPlayback()
+                    }
+                    else{
+                        audioManager.startPlayback()
+                    }
+                    //edit the notePoint to change the position of the note text
+                    notePoint = CGTools.avarage([thumbPoint, fingerAvaragePoint])
                 }
-                else{
-                    audioManager.startPlayback()
-                }
+            Text(noteName)
+                .position(x: notePoint.x, y: notePoint.y)
+                .font(.largeTitle)
+            VStack{
+                Spacer()
+                Text("\(calibratedDistance)")
+                Text("\(audioManager.pitchControl.pitch)")
             }
-        Text("\(calibratedDistance)")
-        Text(noteName)
-        Text("\(audioManager.pitchControl.pitch)")
+            
+        }
     }
 }
 

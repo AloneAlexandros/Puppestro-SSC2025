@@ -100,17 +100,14 @@ struct ScannerView: UIViewControllerRepresentable {
                     let calibrationJoint: [VNHumanHandPoseObservation.JointName] = [.indexMCP]
                     
                     var avaragePoint: CGPoint = .zero
-                    var jointsChecked = 0
+                    var jointsChecked: [CGPoint] = []
                     for joint in fingerJoints {
                         if let recognizedPoint = try? observation.recognizedPoint(joint), recognizedPoint.confidence > 0.8 {
-                            avaragePoint.x += recognizedPoint.location.x
-                            avaragePoint.y += recognizedPoint.location.y
-                            jointsChecked += 1
+                            jointsChecked.append(recognizedPoint.location)
                         }
                     }
-                    if jointsChecked > 0 {
-                        avaragePoint.x /= CGFloat(jointsChecked)
-                        avaragePoint.y /= CGFloat(jointsChecked)
+                    if jointsChecked.count > 0 {
+                        avaragePoint = CGTools.avarage(jointsChecked)
                     }
                     
                     DispatchQueue.main.async {
