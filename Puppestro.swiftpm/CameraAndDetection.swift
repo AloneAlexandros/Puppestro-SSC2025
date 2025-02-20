@@ -97,9 +97,6 @@ struct ScannerView: UIViewControllerRepresentable {
                     let fingerJoints: [VNHumanHandPoseObservation.JointName] = [
                         .indexTip, .middleTip, .ringTip, .littleTip
                     ]
-                    let thumbJoint: [VNHumanHandPoseObservation.JointName] = [.thumbTip]
-                    let wristJoint: [VNHumanHandPoseObservation.JointName] = [.wrist]
-                    let calibrationJoint: [VNHumanHandPoseObservation.JointName] = [.indexMCP]
                     
                     var avaragePoint: CGPoint = .zero
                     var jointsChecked: [CGPoint] = []

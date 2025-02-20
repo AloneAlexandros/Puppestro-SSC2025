@@ -1,7 +1,7 @@
 import SwiftUI
 import Foundation
 
-struct ContentView: View {
+struct CalibrationView: View {
     @EnvironmentObject var database : Database
     @StateObject private var audioManager = AudioManager(fileName: "clarinet", fileExtension: ".m4a", offset: 0)
     @State var thumbPoint: CGPoint = .zero
@@ -28,6 +28,14 @@ struct ContentView: View {
                     }
                     //edit the notePoint to change the position of the note text
                     notePoint = CGTools.avarage([thumbPoint, fingerAvaragePoint])
+                    
+                    //set new minimums and maximums
+                    if Float(calibratedDistance) < database.minimumDistance{
+                        database.minimumDistance = Float(calibratedDistance)
+                    }
+                    if Float(calibratedDistance) > database.maximumDistance{
+                        database.maximumDistance = Float(calibratedDistance)
+                    }
                 }
             Text(noteName)
                 .position(x: notePoint.x, y: notePoint.y)
@@ -39,9 +47,13 @@ struct ContentView: View {
             }
             
         }
+        .onAppear{
+            database.minimumDistance = 1000000
+            database.maximumDistance = -1000000
+        }
     }
 }
 
 #Preview {
-    ContentView()
+    CalibrationView()
 }
