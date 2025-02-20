@@ -72,13 +72,15 @@ struct ScannerView: UIViewControllerRepresentable {
             let orientation: CGImagePropertyOrientation
             switch UIDevice.current.orientation {
             case .portrait:
-                orientation = .leftMirrored // Use leftMirrored for portrait
-            case .landscapeLeft, .landscapeRight:
-                orientation = .downMirrored // Use downMirrored for landscape
+                orientation = .leftMirrored
+            case .landscapeLeft:
+                orientation = .downMirrored
+            case .landscapeRight:
+                orientation = .upMirrored
             case .portraitUpsideDown:
-                orientation = .leftMirrored // Use leftMirrored for upside down portrait
+                orientation = .rightMirrored
             default:
-                orientation = .downMirrored // Default to downMirrored
+                orientation = .upMirrored
             }
 
             let request = VNDetectHumanHandPoseRequest { (request, error) in
