@@ -39,13 +39,12 @@ struct ContentView: View {
                 NavigationLink(destination: CalibrationView()) {
                     Image(systemName: "hand.raised.palm.facing.fill")
                     Text("Calibrate")
-                }.buttonStyle(PlainButtonStyle())
+                }.buttonStyle(PlainButtonStyle()).foregroundColor(.accentColor)
             }
             Button(action: {
                 sheetShown.toggle()
             }, label: {
                 Image(systemName: "slider.vertical.3")
-                    .foregroundColor(.white)
             })
         }
         .onDisappear {

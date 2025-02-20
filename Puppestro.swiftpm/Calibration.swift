@@ -52,7 +52,7 @@ struct CalibrationView: View {
             NavigationStack{
                 NavigationLink(destination: ContentView()) {
                     Image(systemName: "play.fill")
-                }.buttonStyle(PlainButtonStyle())
+                }.buttonStyle(PlainButtonStyle()).foregroundColor(.accentColor)
             }
         }
         .onAppear{
