@@ -32,6 +32,10 @@ struct ScannerView: UIViewControllerRepresentable {
         previewLayer.videoGravity = .resizeAspectFill
         viewController.view.layer.addSublayer(previewLayer)
         
+        if let connection = previewLayer.connection {
+            connection.videoOrientation = UIDevice.current.orientation.videoOrientation // Set initial video orientation
+        }
+        
         NotificationCenter.default.addObserver(forName: UIDevice.orientationDidChangeNotification, object: nil, queue: .main) { _ in
             DispatchQueue.main.async {
                 previewLayer.frame = viewController.view.bounds

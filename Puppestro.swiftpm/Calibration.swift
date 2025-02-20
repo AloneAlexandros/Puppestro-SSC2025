@@ -42,6 +42,13 @@ struct CalibrationView: View {
                 .font(.largeTitle)
         }
         .toolbar{
+            Button(action:{
+                database.minimumDistance = 1000000
+                database.maximumDistance = -1000000
+            },label:{
+                Image(systemName: "arrow.clockwise.circle.fill")
+                Text("Restart Calibration")
+            })
             NavigationStack{
                 NavigationLink(destination: ContentView()) {
                     Image(systemName: "play.fill")
