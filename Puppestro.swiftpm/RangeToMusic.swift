@@ -19,13 +19,12 @@ class RangeToMusic {
         } else {
             correctedValue = currentValue
         }
+        var result = (((correctedValue - minimumValue) * Float(NewRange)) / OldRange)
         var NewValue = 0
-        if OldRange != 0{
-            NewValue = Int((((correctedValue - minimumValue) * Float(NewRange)) / OldRange) + 0)
+        if result.isFinite {
+            NewValue = Int(result)
         }
-        else{
-            NewValue = 0
-        }
+
 
         var currentOctave = startingOctave
         while NewValue > notesPerOctave {

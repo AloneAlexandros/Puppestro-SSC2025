@@ -40,17 +40,22 @@ struct CalibrationView: View {
             Text(noteName)
                 .position(x: notePoint.x, y: notePoint.y)
                 .font(.largeTitle)
-            VStack{
-                Spacer()
-                Text("\(calibratedDistance)")
-                Text("\(audioManager.pitchControl.pitch)")
+        }
+        .toolbar{
+            NavigationStack{
+                NavigationLink(destination: ContentView()) {
+                    Image(systemName: "play.fill")
+                }.buttonStyle(PlainButtonStyle())
             }
-            
         }
         .onAppear{
             database.minimumDistance = 1000000
             database.maximumDistance = -1000000
         }
+        .onDisappear {
+            audioManager.stopPlayback() // Stop sound when leaving view
+        }
+        .navigationBarBackButtonHidden(true)
     }
 }
 
