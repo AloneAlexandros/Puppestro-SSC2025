@@ -18,6 +18,9 @@ struct ScannerView: UIViewControllerRepresentable {
         guard let videoCaptureDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .front),
               let videoInput = try? AVCaptureDeviceInput(device: videoCaptureDevice),
               captureSession.canAddInput(videoInput) else {
+            NotificationCenter.default.addObserver(forName: UIApplication.willResignActiveNotification, object: nil, queue: .main) { _ in
+                self.captureSession.stopRunning()
+            }
             return viewController
         }
         
@@ -48,8 +51,11 @@ struct ScannerView: UIViewControllerRepresentable {
         }
         
         Task {
-            captureSession.startRunning()
+            DispatchQueue.global(qos: .userInitiated).async {
+                captureSession.startRunning()
+            }
         }
+
         
         return viewController
     }
@@ -253,22 +259,24 @@ struct HandRecognitionSimpleOverlay: View {
     @Binding var scale: CGFloat
     @Binding var color: Color
     @Binding var showOverlay: Bool
+    @Binding var eyeScale: CGFloat
+    @Binding var eyeColor: Color
     
     var body: some View {
         ZStack {
             ScannerView(fingerAvaragePoint: $fingerAvaragePoint, wristPoint: $wristPoint, thumbPoint: $thumbPoint, calibrationPoint: $calibrationPoint, overlayPoints: $overlayPoints, eyePoint: $eyePoint)
-            if !showOverlay{
+            if !showOverlay && thumbPoint != .zero{
                 Circle().fill(.green).frame(width: 20).position(x: thumbPoint.x, y: thumbPoint.y)
                 Circle().fill(.green).frame(width: 20).position(x: fingerAvaragePoint.x, y: fingerAvaragePoint.y)
-            }else{
+            }else if thumbPoint != .zero{
                 HandPolygon(points: overlayPoints, scale: scale)
                                 .foregroundStyle(color)
-                Circle().fill(.white).frame(width: 100).position(x: eyePoint.x, y: eyePoint.y)
-                    .offset(x:50, y: -50)
-                Circle().fill(.black).frame(width: 30).position(x: eyePoint.x, y: eyePoint.y)
-                    .offset(x:50, y: -50)
-                Circle().fill(.white).frame(width: 100).position(x: eyePoint.x, y: eyePoint.y)
-                Circle().fill(.black).frame(width: 30).position(x: eyePoint.x, y: eyePoint.y)
+                Circle().fill(.white).frame(width: 100*eyeScale).position(x: eyePoint.x, y: eyePoint.y)
+                    .offset(x:50*eyeScale, y: -50*eyeScale)
+                Circle().fill(eyeColor).frame(width: 30*eyeScale).position(x: eyePoint.x, y: eyePoint.y)
+                    .offset(x:50*eyeScale, y: -50*eyeScale)
+                Circle().fill(.white).frame(width: 100*eyeScale).position(x: eyePoint.x, y: eyePoint.y)
+                Circle().fill(eyeColor).frame(width: 30*eyeScale).position(x: eyePoint.x, y: eyePoint.y)
             }
         }
     }

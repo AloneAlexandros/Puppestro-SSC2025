@@ -16,7 +16,7 @@ struct ContentView: View {
         let calibrationDistance = CGTools.distanceSquared(from: wristPoint, to: calibrationPoint)
         let calibratedDistance = distance/calibrationDistance
         ZStack{
-            HandRecognitionSimpleOverlay(thumbPoint: $thumbPoint, fingerAvaragePoint: $fingerAvaragePoint, wristPoint: $wristPoint, calibrationPoint: $calibrationPoint, scale: $database.scale, color: $database.color, showOverlay: $database.showOverlay)
+            HandRecognitionSimpleOverlay(thumbPoint: $thumbPoint, fingerAvaragePoint: $fingerAvaragePoint, wristPoint: $wristPoint, calibrationPoint: $calibrationPoint, scale: $database.scale, color: $database.color, showOverlay: $database.showOverlay, eyeScale: $database.eyeScale, eyeColor: $database.eyeColor)
                 .onChange(of: thumbPoint) {
                     var pitch: Float
                     (noteName, pitch) = RangeToMusic.returnCorrectNote(allNotes: database.allNotes, minimumValue: database.minimumDistance, maximumValue: database.maximumDistance, currentValue: Float(calibratedDistance), pitchOffset: 0, octaves: database.octaves, startingOctave: database.startingOctave)
@@ -35,17 +35,28 @@ struct ContentView: View {
                 .font(.largeTitle)
         }
         .toolbar{
-            NavigationStack{
-                NavigationLink(destination: CalibrationView()) {
-                    Image(systemName: "hand.raised.palm.facing.fill")
-                    Text("Calibrate")
-                }.buttonStyle(PlainButtonStyle()).foregroundColor(.accentColor)
+            ToolbarItem(placement:.topBarLeading){
+                NavigationStack{
+                    NavigationLink(destination: WelcomeScreen()) {
+                        Image(systemName: "house.fill")
+                    }.buttonStyle(PlainButtonStyle()).foregroundColor(.accentColor)
+                }
             }
-            Button(action: {
-                sheetShown.toggle()
-            }, label: {
-                Image(systemName: "slider.vertical.3")
-            })
+            ToolbarItem{
+                NavigationStack{
+                    NavigationLink(destination: CalibrationView()) {
+                        Image(systemName: "hand.raised.palm.facing.fill")
+                        Text("Calibrate")
+                    }.buttonStyle(PlainButtonStyle()).foregroundColor(.accentColor)
+                }
+            }
+            ToolbarItem{
+                Button(action: {
+                    sheetShown.toggle()
+                }, label: {
+                    Image(systemName: "slider.vertical.3")
+                })
+            }
         }
         .onDisappear {
             audioManager.stopPlayback() // Stop sound when leaving view
@@ -53,20 +64,48 @@ struct ContentView: View {
         .navigationBarBackButtonHidden(true)
         .sheet(isPresented: $sheetShown){
             VStack{
-                Toggle(isOn: $database.allNotes, label:{
-                                Text("All notes")
-                })
-                Toggle(isOn: $database.showOverlay, label:{
-                                Text("Show puppet overlay")
-                })
-                if database.showOverlay
-                {
+                Text("Settings")
+                    .font(.largeTitle)
+                Spacer()
+                List{
+                    Section(header: Text("Notes")){
+                        Toggle(isOn: $database.allNotes, label:{
+                            Text("All notes")
+                            Text("Allows you to play the sharp notes too, not only the 7 base notes")
+                                .font(.caption)
+                        })
+                        Stepper(value: $database.octaves, in: 1...2-database.startingOctave) {
+                            Text("Octaves: \(database.octaves)")
+                            Text("Making this higher will make playing notes harder, since it needs more precission")
+                                .font(.caption)
+                        }
+                        Stepper(value: $database.startingOctave, in: -2...1){
+                            Text("Starting octave: \(database.startingOctave)")
+                            Text("0 is the 4th octave, with A at 440Hz")
+                                .font(.caption)
+                        }
+                    }
+                    Section(header: Text("Puppet overlay")){
+                        Toggle(isOn: $database.showOverlay, label:{
+                            Text("Show puppet overlay")
+                        })
+                        if database.showOverlay
+                        {
+                            HStack{
+                                Text("Puppet scale")
+                                Slider(value: $database.scale, in: 0...3)
+                            }
+                            HStack{
+                                Text("Eye scale")
+                                Slider(value: $database.eyeScale, in: 0...3)
+                            }
+                            ColorPicker("Puppet color", selection: $database.color)
+                            ColorPicker("Eye color", selection: $database.eyeColor)
+                        }
+                    }
                     
-                    Slider(value: $database.scale, in: 0...3)
-                                    ColorPicker("Puppet color", selection: $database.color)
                 }
-            }
-                .padding(10)
+            }.padding(10)
         }
     }
     

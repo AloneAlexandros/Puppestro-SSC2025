@@ -16,7 +16,7 @@ struct CalibrationView: View {
         let calibrationDistance = CGTools.distanceSquared(from: wristPoint, to: calibrationPoint)
         let calibratedDistance = distance/calibrationDistance
         ZStack{
-            HandRecognitionSimpleOverlay(thumbPoint: $thumbPoint, fingerAvaragePoint: $fingerAvaragePoint, wristPoint: $wristPoint, calibrationPoint: $calibrationPoint, scale: $database.scale, color: $database.color, showOverlay: $showOverlay)
+            HandRecognitionSimpleOverlay(thumbPoint: $thumbPoint, fingerAvaragePoint: $fingerAvaragePoint, wristPoint: $wristPoint, calibrationPoint: $calibrationPoint, scale: $database.scale, color: $database.color, showOverlay: $showOverlay, eyeScale: $database.eyeScale, eyeColor: $database.eyeColor)
                 .onChange(of: thumbPoint) {
                     var pitch: Float
                     (noteName, pitch) = RangeToMusic.returnCorrectNote(allNotes: false, minimumValue: database.minimumDistance, maximumValue: database.maximumDistance, currentValue: Float(calibratedDistance), pitchOffset: 0, octaves: 1, startingOctave: 0)
@@ -43,17 +43,28 @@ struct CalibrationView: View {
                 .font(.largeTitle)
         }
         .toolbar{
-            Button(action:{
-                database.minimumDistance = 1000000
-                database.maximumDistance = -1000000
-            },label:{
-                Image(systemName: "arrow.clockwise.circle.fill")
-                Text("Restart Calibration")
-            })
-            NavigationStack{
-                NavigationLink(destination: ContentView()) {
-                    Image(systemName: "play.fill")
-                }.buttonStyle(PlainButtonStyle()).foregroundColor(.accentColor)
+            ToolbarItem(placement:.topBarLeading){
+                NavigationStack{
+                    NavigationLink(destination: WelcomeScreen()) {
+                        Image(systemName: "house.fill")
+                    }.buttonStyle(PlainButtonStyle()).foregroundColor(.accentColor)
+                }
+            }
+            ToolbarItem{
+                Button(action:{
+                    database.minimumDistance = 1000000
+                    database.maximumDistance = -1000000
+                },label:{
+                    Image(systemName: "arrow.clockwise.circle.fill")
+                    Text("Restart Calibration")
+                })
+            }
+            ToolbarItem{
+                NavigationStack{
+                    NavigationLink(destination: ContentView()) {
+                        Image(systemName: "music.mic")
+                    }.buttonStyle(PlainButtonStyle()).foregroundColor(.accentColor)
+                }
             }
         }
         .onAppear{
