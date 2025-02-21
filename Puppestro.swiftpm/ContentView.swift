@@ -16,7 +16,7 @@ struct ContentView: View {
         let calibrationDistance = CGTools.distanceSquared(from: wristPoint, to: calibrationPoint)
         let calibratedDistance = distance/calibrationDistance
         ZStack{
-            HandRecognitionSimpleOverlay(thumbPoint: $thumbPoint, fingerAvaragePoint: $fingerAvaragePoint, wristPoint: $wristPoint, calibrationPoint: $calibrationPoint)
+            HandRecognitionSimpleOverlay(thumbPoint: $thumbPoint, fingerAvaragePoint: $fingerAvaragePoint, wristPoint: $wristPoint, calibrationPoint: $calibrationPoint, scale: $database.scale, color: $database.color, showOverlay: $database.showOverlay)
                 .onChange(of: thumbPoint) {
                     var pitch: Float
                     (noteName, pitch) = RangeToMusic.returnCorrectNote(allNotes: database.allNotes, minimumValue: database.minimumDistance, maximumValue: database.maximumDistance, currentValue: Float(calibratedDistance), pitchOffset: 0, octaves: database.octaves, startingOctave: database.startingOctave)
@@ -55,7 +55,16 @@ struct ContentView: View {
             VStack{
                 Toggle(isOn: $database.allNotes, label:{
                                 Text("All notes")
-                            })
+                })
+                Toggle(isOn: $database.showOverlay, label:{
+                                Text("Show puppet overlay")
+                })
+                if database.showOverlay
+                {
+                    
+                    Slider(value: $database.scale, in: 0...3)
+                                    ColorPicker("Puppet color", selection: $database.color)
+                }
             }
                 .padding(10)
         }

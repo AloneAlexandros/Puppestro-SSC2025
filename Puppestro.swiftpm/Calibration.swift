@@ -10,12 +10,13 @@ struct CalibrationView: View {
     @State var calibrationPoint: CGPoint = .zero
     @State var noteName: String = "none"
     @State var notePoint: CGPoint = .zero
+    @State var showOverlay: Bool = false
     var body: some View {
         let distance = CGTools.distanceSquared(from: thumbPoint, to: fingerAvaragePoint)
         let calibrationDistance = CGTools.distanceSquared(from: wristPoint, to: calibrationPoint)
         let calibratedDistance = distance/calibrationDistance
         ZStack{
-            HandRecognitionSimpleOverlay(thumbPoint: $thumbPoint, fingerAvaragePoint: $fingerAvaragePoint, wristPoint: $wristPoint, calibrationPoint: $calibrationPoint)
+            HandRecognitionSimpleOverlay(thumbPoint: $thumbPoint, fingerAvaragePoint: $fingerAvaragePoint, wristPoint: $wristPoint, calibrationPoint: $calibrationPoint, scale: $database.scale, color: $database.color, showOverlay: $showOverlay)
                 .onChange(of: thumbPoint) {
                     var pitch: Float
                     (noteName, pitch) = RangeToMusic.returnCorrectNote(allNotes: false, minimumValue: database.minimumDistance, maximumValue: database.maximumDistance, currentValue: Float(calibratedDistance), pitchOffset: 0, octaves: 1, startingOctave: 0)

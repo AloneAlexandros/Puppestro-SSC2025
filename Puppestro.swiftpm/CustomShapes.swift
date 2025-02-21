@@ -2,23 +2,27 @@ import SwiftUI
 
 struct HandPolygon: Shape {
     var points: [CGPoint]
-    
+    var scale: CGFloat = 1.0
+
     func path(in rect: CGRect) -> Path {
         var path = Path()
-        
         guard !points.isEmpty else { return path }
+
+        let center = CGTools.avarage(points)
         
-        // Move to the first point
-        path.move(to: points[0])
-        
-        // Add lines to each subsequent point
-        for point in points.dropFirst() {
+        // Scale points about the centroid.
+        let scaledPoints = points.map { point -> CGPoint in
+            let dx = point.x - center.x
+            let dy = point.y - center.y
+            return CGPoint(x: center.x + dx * scale, y: center.y + dy * scale)
+        }
+
+        // Draw the polygon.
+        path.move(to: scaledPoints[0])
+        for point in scaledPoints.dropFirst() {
             path.addLine(to: point)
         }
-        
-        // Close the path
         path.closeSubpath()
-        
         return path
     }
 }

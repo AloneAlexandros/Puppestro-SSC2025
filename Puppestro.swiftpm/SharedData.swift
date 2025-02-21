@@ -6,4 +6,7 @@ class Database : ObservableObject {
     @Published var allNotes = false
     @Published var octaves = 1
     @Published var startingOctave = 0
+    @Published var scale: CGFloat = 1.0
+    @Published var color = Color.red
+    @Published var showOverlay: Bool = true
 }

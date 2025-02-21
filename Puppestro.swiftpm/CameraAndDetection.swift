@@ -7,6 +7,8 @@ struct ScannerView: UIViewControllerRepresentable {
     @Binding var wristPoint: CGPoint
     @Binding var thumbPoint: CGPoint
     @Binding var calibrationPoint: CGPoint
+    @Binding var overlayPoints: [CGPoint]
+    @Binding var eyePoint: CGPoint
     
     let captureSession = AVCaptureSession()
     
@@ -101,6 +103,15 @@ struct ScannerView: UIViewControllerRepresentable {
                     let fingerJoints: [VNHumanHandPoseObservation.JointName] = [
                         .indexTip, .middleTip, .ringTip, .littleTip
                     ]
+                    let pipJoints: [VNHumanHandPoseObservation.JointName] = [
+                        .indexPIP, .middlePIP, .ringPIP, .littlePIP
+                    ]
+                    let mcpJoints: [VNHumanHandPoseObservation.JointName] = [
+                        .indexMCP, .middleMCP, .ringMCP, .littleMCP
+                    ]
+                    let dipJoints: [VNHumanHandPoseObservation.JointName] = [
+                        .indexDIP, .middleDIP, .ringDIP, .littleDIP
+                    ]
                     
                     var avaragePoint: CGPoint = .zero
                     var jointsChecked: [CGPoint] = []
@@ -113,14 +124,75 @@ struct ScannerView: UIViewControllerRepresentable {
                         avaragePoint = CGTools.avarage(jointsChecked)
                     }
                     
+                    var avaragePIP: CGPoint = .zero
+                    jointsChecked = []
+                    for joint in pipJoints {
+                        if let recognizedPoint = try? observation.recognizedPoint(joint), recognizedPoint.confidence > 0.8 {
+                            jointsChecked.append(recognizedPoint.location)
+                        }
+                    }
+                    if jointsChecked.count > 0 {
+                        avaragePIP = CGTools.avarage(jointsChecked)
+                    }
+                    
+                    var avarageMCP: CGPoint = .zero
+                    jointsChecked = []
+                    for joint in mcpJoints {
+                        if let recognizedPoint = try? observation.recognizedPoint(joint), recognizedPoint.confidence > 0.8 {
+                            jointsChecked.append(recognizedPoint.location)
+                        }
+                    }
+                    if jointsChecked.count > 0 {
+                        avarageMCP = CGTools.avarage(jointsChecked)
+                    }
+                    
+                    var avarageDIP: CGPoint = .zero
+                    jointsChecked = []
+                    for joint in dipJoints {
+                        if let recognizedPoint = try? observation.recognizedPoint(joint), recognizedPoint.confidence > 0.8 {
+                            jointsChecked.append(recognizedPoint.location)
+                        }
+                    }
+                    if jointsChecked.count > 0 {
+                        avarageDIP = CGTools.avarage(jointsChecked)
+                    }
+                    
+                    jointsChecked = []
+                    for joint in fingerJoints {
+                        if let recognizedPoint = try? observation.recognizedPoint(joint), recognizedPoint.confidence > 0.8 {
+                            jointsChecked.append(recognizedPoint.location)
+                        }
+                    }
+                    if jointsChecked.count > 0 {
+                        avaragePoint = CGTools.avarage(jointsChecked)
+                    }
                     DispatchQueue.main.async {
+                        var overlayPoints : [CGPoint] = []
                         self.parent.fingerAvaragePoint = self.convertVisionPoint(avaragePoint)
                         if let thumb = try? observation.recognizedPoint(.thumbTip), thumb.confidence > 0.8 {
                             self.parent.thumbPoint = self.convertVisionPoint(thumb.location)
+                            overlayPoints.append(self.convertVisionPoint(thumb.location))
+                        }
+                        if let thumb = try? observation.recognizedPoint(.thumbIP), thumb.confidence > 0.8 {
+                            overlayPoints.append(self.convertVisionPoint(thumb.location))
+                        }
+                        if let thumb = try? observation.recognizedPoint(.thumbIP), thumb.confidence > 0.8 {
+                            overlayPoints.append(self.convertVisionPoint(thumb.location))
+                        }
+                        if let thumb = try? observation.recognizedPoint(.thumbCMC), thumb.confidence > 0.8 {
+                            overlayPoints.append(self.convertVisionPoint(thumb.location))
                         }
                         if let wrist = try? observation.recognizedPoint(.wrist), wrist.confidence > 0.8 {
                             self.parent.wristPoint = self.convertVisionPoint(wrist.location)
+                            overlayPoints.append(self.convertVisionPoint(wrist.location))
                         }
+                        overlayPoints.append(self.convertVisionPoint(avarageMCP))
+                        overlayPoints.append(self.convertVisionPoint(avaragePIP))
+                        overlayPoints.append(self.convertVisionPoint(avarageDIP))
+                        self.parent.eyePoint = self.convertVisionPoint(avarageDIP)
+                        overlayPoints.append(self.convertVisionPoint(avaragePoint))
+                        overlayPoints.append(CGTools.avarage([self.parent.thumbPoint, self.parent.wristPoint,self.parent.fingerAvaragePoint]))
+                        self.parent.overlayPoints = overlayPoints
                         if let calibration = try? observation.recognizedPoint(.indexMCP), calibration.confidence > 0.8 {
                             self.parent.calibrationPoint = self.convertVisionPoint(calibration.location)
                         }
@@ -176,12 +248,28 @@ struct HandRecognitionSimpleOverlay: View {
     @Binding var fingerAvaragePoint: CGPoint
     @Binding var wristPoint: CGPoint
     @Binding var calibrationPoint: CGPoint
+    @State private var overlayPoints: [CGPoint] = []
+    @State private var eyePoint: CGPoint = .zero
+    @Binding var scale: CGFloat
+    @Binding var color: Color
+    @Binding var showOverlay: Bool
     
     var body: some View {
         ZStack {
-            ScannerView(fingerAvaragePoint: $fingerAvaragePoint, wristPoint: $wristPoint, thumbPoint: $thumbPoint, calibrationPoint: $calibrationPoint)
-            Circle().fill(.green).frame(width: 20).position(x: thumbPoint.x, y: thumbPoint.y)
-            Circle().fill(.green).frame(width: 20).position(x: fingerAvaragePoint.x, y: fingerAvaragePoint.y)
+            ScannerView(fingerAvaragePoint: $fingerAvaragePoint, wristPoint: $wristPoint, thumbPoint: $thumbPoint, calibrationPoint: $calibrationPoint, overlayPoints: $overlayPoints, eyePoint: $eyePoint)
+            if !showOverlay{
+                Circle().fill(.green).frame(width: 20).position(x: thumbPoint.x, y: thumbPoint.y)
+                Circle().fill(.green).frame(width: 20).position(x: fingerAvaragePoint.x, y: fingerAvaragePoint.y)
+            }else{
+                HandPolygon(points: overlayPoints, scale: scale)
+                                .foregroundStyle(color)
+                Circle().fill(.white).frame(width: 100).position(x: eyePoint.x, y: eyePoint.y)
+                    .offset(x:50, y: -50)
+                Circle().fill(.black).frame(width: 30).position(x: eyePoint.x, y: eyePoint.y)
+                    .offset(x:50, y: -50)
+                Circle().fill(.white).frame(width: 100).position(x: eyePoint.x, y: eyePoint.y)
+                Circle().fill(.black).frame(width: 30).position(x: eyePoint.x, y: eyePoint.y)
+            }
         }
     }
 }
@@ -191,9 +279,11 @@ struct HandRecognitionTest: View {
     @State private var fingerAvaragePoint: CGPoint = .zero
     @State private var wristPoint: CGPoint = .zero
     @State private var calibrationPoint: CGPoint = .zero
+    @State private var overlayPoints: [CGPoint] = []
+    @State private var eyePoint: CGPoint = .zero
     
     var body: some View {
-        HandRecognitionSimpleOverlay(thumbPoint: $thumbPoint, fingerAvaragePoint: $fingerAvaragePoint, wristPoint: $wristPoint, calibrationPoint: $calibrationPoint)
+        ScannerView(fingerAvaragePoint: $fingerAvaragePoint, wristPoint: $wristPoint, thumbPoint: $thumbPoint, calibrationPoint: $calibrationPoint, overlayPoints: $overlayPoints, eyePoint: $eyePoint)
     }
 }
 
