@@ -55,7 +55,10 @@ struct ContentView: View {
                     sheetShown.toggle()
                 }, label: {
                     Image(systemName: "slider.vertical.3")
-                })
+                }).popover(isPresented: $database.popOverIsPresent){
+                    Text("Here you can edit the sounds the puppet makes and the puppet's appearance")
+                        .padding(20)
+                }
             }
         }
         .onDisappear {
@@ -112,5 +115,6 @@ struct ContentView: View {
 }
 
 #Preview {
-    ContentView()
+    var database = Database()
+    ContentView().environmentObject(database)
 }

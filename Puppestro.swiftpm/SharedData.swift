@@ -11,4 +11,5 @@ class Database : ObservableObject {
     @Published var showOverlay: Bool = true
     @Published var eyeScale: CGFloat = 1
     @Published var eyeColor: Color = Color.black
+    @Published var popOverIsPresent: Bool = true
 }
