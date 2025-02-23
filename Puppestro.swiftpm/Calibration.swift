@@ -56,10 +56,12 @@ struct CalibrationView: View {
                     }
                 }
             ZStack{
-                CircularProgressView(barColor: $barColor, progress: $counter, maxProgress: $maxCounter)
-                    .frame(width: 200, height: 200)
-                Text(noteName)
-                    .font(.largeTitle)
+                if thumbPoint != .zero{
+                    CircularProgressView(barColor: $barColor, progress: $counter, maxProgress: $maxCounter)
+                        .frame(width: 200, height: 200)
+                    Text(noteName)
+                        .font(.largeTitle)
+                }
             }.position(x: notePoint.x, y: notePoint.y)
             if(countdown>0)
             {

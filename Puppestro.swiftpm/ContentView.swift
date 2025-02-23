@@ -30,9 +30,11 @@ struct ContentView: View {
                     //edit the notePoint to change the position of the note text
                     notePoint = CGTools.avarage([thumbPoint, fingerAvaragePoint])
                 }
-            Text(noteName)
-                .position(x: notePoint.x, y: notePoint.y)
-                .font(.largeTitle)
+            if thumbPoint != .zero{
+                Text(noteName)
+                    .position(x: notePoint.x, y: notePoint.y)
+                    .font(.largeTitle)
+            }
         }
         .toolbar{
             ToolbarItem(placement:.topBarLeading){
