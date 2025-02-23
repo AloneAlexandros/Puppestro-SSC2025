@@ -23,37 +23,32 @@ struct WelcomeScreen: View {
                 ]
                 LazyVGrid(columns: rows, spacing: 20)
                 {
-                    Section("Play"){
-                        NavigationLink(destination: Tutorial()){
-                            VStack{
-                                Image(systemName: "graduationcap.fill")
-                                    .frame(width: 210, height: 170)
-                                    .background(Color.green)
-                                    .cornerRadius(10)
-                                    .foregroundColor(.white)
-                                    .font(.largeTitle)
-                                Text("Tutorial")
-                                    .font(.caption)
-                            }
-                            
-                        }.buttonStyle(PlainButtonStyle())
-                        NavigationLink(destination: CalibrateSwitcher(isCalibrated: (database.maximumDistance != 0))){
-                            VStack{
-                                Image(systemName: "music.mic")
-                                    .frame(width: 210, height: 170)
-                                    .background(Color.yellow)
-                                    .cornerRadius(10)
-                                    .foregroundColor(.white)
-                                    .font(.largeTitle)
-                                Text("Freeplay")
-                                    .font(.caption)
-                            }
-                            
-                        }.buttonStyle(PlainButtonStyle())
-                    }
-                    Section("Songs"){
-                        //more to come later
-                    }
+                    NavigationLink(destination: Tutorial()){
+                        VStack{
+                            Image(systemName: "graduationcap.fill")
+                                .frame(width: 210, height: 170)
+                                .background(Color.green)
+                                .cornerRadius(10)
+                                .foregroundColor(.white)
+                                .font(.largeTitle)
+                            Text("Tutorial")
+                                .font(.caption)
+                        }
+                        
+                    }.buttonStyle(PlainButtonStyle())
+                    NavigationLink(destination: CalibrateSwitcher(isCalibrated: (database.maximumDistance != 0))){
+                        VStack{
+                            Image(systemName: "music.mic")
+                                .frame(width: 210, height: 170)
+                                .background(Color.yellow)
+                                .cornerRadius(10)
+                                .foregroundColor(.white)
+                                .font(.largeTitle)
+                            Text("Freeplay")
+                                .font(.caption)
+                        }
+                        
+                    }.buttonStyle(PlainButtonStyle())
                 }.padding(50)
             }
             Spacer()
