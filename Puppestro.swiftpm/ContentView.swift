@@ -33,7 +33,7 @@ struct ContentView: View {
             if thumbPoint != .zero{
                 Text(noteName)
                     .position(x: notePoint.x, y: notePoint.y)
-                    .font(.largeTitle)
+                    .font(.largeTitle)  
             }
         }
         .toolbar{

@@ -37,8 +37,8 @@ struct CalibrationView: View {
                         if counter <= maxCounter{
                             counter += 1
                         }
-                        if counter > maxCounter{
-                            countdown = 3
+                        if counter >= maxCounter{
+                            countdown = 5
                             showSheet = true
                         }
                     } else{
