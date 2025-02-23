@@ -12,11 +12,27 @@ struct Tutorial: View {
                     .foregroundStyle(.white)
                     .cornerRadius(10)
                     .padding(30)
-            Text("Put your ipad on some kind of stand facing towards you. Make sure it can only see ONE hand, two hands will confuse the hand recognition")
+            Text("Place your ipad on some kind of stand facing towards you. Make sure it can only see ONE hand, two hands will confuse the hand recognition")
                 .padding(10)
                 .font(.title3)
                 .multilineTextAlignment(.center)
                 .bold(true)
+            HStack{
+                Image("ipad")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 300, height: 300)
+                    .background(.gray)
+                    .cornerRadius(40)
+                    .padding(10)
+                Image("backpad")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 300, height: 300)
+                    .background(.gray)
+                    .cornerRadius(40)
+                    .padding(10)
+            }
                 Text("Make sure you don't wear anything on your hand, as it will mess with the hand recognition. No gloves and absolutely no socks!")
                     .padding(10)
                     .font(.title3)
@@ -179,7 +195,7 @@ struct Tutorial: View {
                 .multilineTextAlignment(.center)
                 .bold(true)
             NavigationStack{
-                NavigationLink(destination: CalibrationView()){
+                NavigationLink(destination: CalibrateSwitcher()){
                     HStack{
                         Image(systemName: "arrowshape.right.fill")
                         Text("Continue to calibration")

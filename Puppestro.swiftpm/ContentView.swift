@@ -44,7 +44,7 @@ struct ContentView: View {
             }
             ToolbarItem{
                 NavigationStack{
-                    NavigationLink(destination: CalibrationView()) {
+                    NavigationLink(destination: CalibrateSwitcher()) {
                         Image(systemName: "hand.raised.palm.facing.fill")
                         Text("Calibrate")
                     }.buttonStyle(PlainButtonStyle()).foregroundColor(.accentColor)

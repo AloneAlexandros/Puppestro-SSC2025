@@ -28,7 +28,7 @@ struct WelcomeScreen: View {
                             VStack{
                                 Image(systemName: "graduationcap.fill")
                                     .frame(width: 210, height: 170)
-                                    .background(Color.orange)
+                                    .background(Color.green)
                                     .cornerRadius(10)
                                     .foregroundColor(.white)
                                     .font(.largeTitle)
@@ -37,7 +37,7 @@ struct WelcomeScreen: View {
                             }
                             
                         }.buttonStyle(PlainButtonStyle())
-                        NavigationLink(destination: ContentView()){
+                        NavigationLink(destination: CalibrateSwitcher(isCalibrated: (database.maximumDistance != 0))){
                             VStack{
                                 Image(systemName: "music.mic")
                                     .frame(width: 210, height: 170)
@@ -46,19 +46,6 @@ struct WelcomeScreen: View {
                                     .foregroundColor(.white)
                                     .font(.largeTitle)
                                 Text("Freeplay")
-                                    .font(.caption)
-                            }
-                            
-                        }.buttonStyle(PlainButtonStyle())
-                        NavigationLink(destination: CalibrationView()){
-                            VStack{
-                                Image(systemName: "hand.raised.palm.facing.fill")
-                                    .frame(width: 210, height: 170)
-                                    .background(Color.green)
-                                    .cornerRadius(10)
-                                    .foregroundColor(.white)
-                                    .font(.largeTitle)
-                                Text("Calibrate")
                                     .font(.caption)
                             }
                             
